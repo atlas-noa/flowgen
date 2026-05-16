@@ -1,0 +1,23 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        # Bundle the live editor (esbuild → editor.bundle.js).
+        - npm run build:editor
+        # Re-render the canonical example so recovery-flow.html is fresh.
+        - npm run render
+  artifacts:
+    # Site root. baseDirectory '/' is Amplify's convention for "the project
+    # root after the build completes." files: '**/*' is the standard glob —
+    # listing individual filenames is brittle, so we ship everything that
+    # isn't in node_modules or other ignored paths.
+    baseDirectory: /
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
