@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account Recovery Flow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+    <div class="min-h-screen bg-stone-100 p-6" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');</style>
+      <div class="mx-auto" style="max-width: 960px">
+        <div class="mb-8 pb-4" style="border-bottom: 3px solid #0c0a09">
+    <div class="flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <div class="text-[10px] tracking-[0.3em] text-stone-500 mb-2" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">self-service device recovery · DEMO MVP · RECOVERY FLOW · WITH AUDIT EVENTS</div>
+        <h1 class="text-4xl text-stone-900 font-bold tracking-tight" style="font-family: ui-serif, 'Georgia', serif">Account Recovery Flow</h1>
+        <p class="text-[11px] text-stone-600 mt-2 max-w-3xl leading-relaxed" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Mobile-initiated recovery using context-aware behavioral questions. Actor shown as a bordered label tag. Outcomes carry color at terminal nodes and along path arrows. Amber pills mark steps that emit an audit event to the event log.
+</p>
+      </div>
+      <div class="bg-white border-2 border-stone-900 p-3 space-y-2 min-w-[260px]">
+    <div class="text-[9px] font-bold tracking-[0.25em] text-stone-500 pb-1 border-b border-stone-300" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">LEGEND</div>
+    <div class="flex items-center gap-2 flex-wrap"><span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span><span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span><span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #5b21b6; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>MANAGER</span></div>
+    <div class="flex items-center gap-2 pt-1 border-t border-stone-200"><span class="text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">PASS</span><span class="text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">FAIL</span></div>
+    <div class="flex items-center gap-2 pt-1 border-t border-stone-200">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">event.name.here</span></span>
+      <span class="text-[9px] text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">audit log</span>
+    </div>
+  </div>
+    </div>
+  </div>
+        <div><div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">01</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Opens newcore mobile app</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Entry point. App detects unauthenticated state and surfaces the recovery CTA.</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 20px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">02</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Taps &quot;Can&#39;t log in? Start recovery&quot;</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Primary affordance on the pre-auth screen.</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 20px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">03</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Enters username</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Single text field with autocomplete disabled. Accepts username or email. Triggers the recovery request and dispatches the owner-notification (out-of-band).
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.request</span></span></div>
+  </div></div><div class="my-3 ml-6">
+    <div class="flex items-stretch">
+      <div class="flex flex-col items-center pr-3">
+        <svg width="20" height="40" viewBox="0 0 20 40" class="-mt-2">
+          <path d="M 10 0 L 10 20 L 20 20" stroke="#92400e" stroke-width="2" stroke-dasharray="3 3" fill="none"></path>
+        </svg>
+      </div>
+      <div class="flex-1 bg-white" style="border: 2px dashed #b45309; background-color: #fffbeb">
+        <div class="px-3 py-2.5">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+            <span class="text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #92400e; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">ASYNC · PARALLEL</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          </div>
+          <div class="text-[12px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Owner notified out-of-band</div>
+          <div class="text-[10px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Notification dispatched to account holder via email/push (system log). Owner can click &quot;this is not me&quot; at any time during or after recovery to file a dispute. Late dispute triggers fraud-rollback chain.
+</div>
+          <div class="flex flex-wrap gap-1 mt-2 pt-2 items-center" style="border-top: 1px dashed #b45309">
+                <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.dispute.create</span></span>
+                <span class="text-[9px] tracking-[0.05em] px-1.5 py-0.5 text-stone-600 italic" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">↳ fires only on dispute click; can occur post-completion</span>
+              </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 20px; background-color: #1c1917"></div>
+    <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #1c1917; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">ENTER STEPS 04 + 05</div>
+        <div style="width: 2px; height: 6px; background-color: #1c1917"></div>
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border: 2px dashed #1c1917">
+    <div class="absolute -top-3 left-3 bg-stone-900 text-white px-2 py-1">
+      <span class="text-[9px] font-bold tracking-[0.25em]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">STEPS 04 + 05 · PARALLEL</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 pt-5"><div>
+      <div class="text-[9px] font-bold tracking-[0.25em] text-stone-500 mb-2" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">STEP 04 · USER SEES</div>
+      <div class="space-y-1.5"><div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">04</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Reads recovery flow primer</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Primer screen describes the challenge, sets expectations on timing and skipping. Dwell time hides backend latency on the right.
+</div>
+    
+  </div></div></div>
+    </div><div>
+      <div class="text-[9px] font-bold tracking-[0.25em] text-stone-500 mb-2" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">STEP 05 · BACKEND CHALLENGE PREP</div>
+      <div class="space-y-1.5"><div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">5.1</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Poll context systems</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Parallel fan-out to IdP, HR, Calendar. Per-adapter 1s timeout.</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 8px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">5.2</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Verify TOTP factor (if enrolled)</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Pre-KBA gate. Skipped when user has no TOTP factor enrolled.</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">auth.totp.verify</span></span></div>
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 8px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">5.3</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Generate questions via model</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Context + question requirements (count, canary y/n) → structured JSON challenge.
+</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 8px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">5.4</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Compute initial risk score</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Risk Service evaluates available signals. Defaults to 50 (Medium) on service unavailability.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">risk.recovery.create</span></span></div>
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 8px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">5.5</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Commit challenge server-side</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Authoritative challenge entity stored. Correct answer indices held server-side only.
+</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 8px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">5.6</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Deliver challenge to device</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Client receives questions + options only, never correct_index. Push delivery is system log.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.challenge.create</span></span></div>
+  </div></div></div>
+    </div></div>
+  </div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 20px; background-color: #1c1917"></div>
+    <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #1c1917; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">CHALLENGE READY</div>
+        <div style="width: 2px; height: 6px; background-color: #1c1917"></div>
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">06</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Answers recovery questions</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Multiple choice, one question at a time. Skip allowed. Timer visible but non-punishing.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.challenge.complete</span></span></div>
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 20px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">07</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Compute risk verdict</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Final score with answer correctness applied. Canary trips force a fail verdict. Score matched against configured threshold.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">risk.recovery.verdict</span></span></div>
+  </div></div>
+<div class="flex justify-center py-2">
+    <div class="relative text-[11px] tracking-[0.2em] font-bold px-5 py-2 text-white" style="background-color: #0c0a09; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%)">PASSES THRESHOLD?</div>
+  </div>
+<div class="flex flex-col items-stretch">
+    <div class="flex justify-center">
+      <div style="width: 2px; height: 14px; background-color: #1c1917"></div>
+    </div>
+    <div class="grid grid-cols-2 relative"><div class="relative">
+      <div class="absolute top-0" style="left: 50%; right: 0; height: 2px; background-color: #1c1917"></div>
+    </div><div class="relative">
+      <div class="absolute top-0" style="left: 0; right: 50%; height: 2px; background-color: #1c1917"></div>
+    </div></div>
+    <div class="grid grid-cols-2"><div class="flex flex-col items-center">
+      <div style="width: 2px; height: 10px; background-color: #059669"></div>
+      <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">YES · PASS</div>
+      <div style="width: 2px; height: 8px; background-color: #059669"></div>
+      <svg width="12" height="10" viewBox="0 0 12 10">
+        <path d="M 0 0 L 12 0 L 6 10 Z" fill="#059669"></path>
+      </svg>
+    </div><div class="flex flex-col items-center">
+      <div style="width: 2px; height: 10px; background-color: #dc2626"></div>
+      <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">NO · FAIL</div>
+      <div style="width: 2px; height: 8px; background-color: #dc2626"></div>
+      <svg width="12" height="10" viewBox="0 0 12 10">
+        <path d="M 0 0 L 12 0 L 6 10 Z" fill="#dc2626"></path>
+      </svg>
+    </div></div>
+  </div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 20px; background-color: #059669"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#059669"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-left: 5px solid #059669; border: 1px solid rgba(5, 150, 105, 0.25); border-left-width: 5px">
+    <div class="flex items-baseline gap-3 px-4 py-2 border-b" style="border-color: rgba(5, 150, 105, 0.19); background-color: rgba(5, 150, 105, 0.03)">
+      <span class="text-[9px] font-bold tracking-[0.25em] px-1.5 py-0.5 text-white" style="background-color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">08</span>
+      <span class="text-[11px] font-bold tracking-[0.1em] uppercase" style="color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Auto-approved</span>
+      <span class="text-[10px] text-stone-500 ml-auto" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Threshold met · no manager involvement</span>
+    </div>
+    <div class="p-4 space-y-2"><div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">8.1</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Pair device as new MFA factor</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">This phone registered as push factor. Session token issued.</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">credential.core_app.enroll</span></span></div>
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 10px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">8.2</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Send success email</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Notification to corporate email so a legit user can catch unauthorized recovery post-hoc. (System log — delivery mechanics.)
+</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 10px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">8.3</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Finalize recovery</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Closes the recovery flow with success terminal state.</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.complete</span></span></div>
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 10px; background-color: #1c1917"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#1c1917"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border: 2px solid #059669; border-top-width: 4px"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #1e3a8a; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>USER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">8.4</span>
+      
+      <span class="ml-auto text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">PASS</span>
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Login confirmation screen</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">&quot;You&#39;re set — log in with your new device.&quot; Clear next action.</div>
+    
+  </div></div>
+<div class="flex justify-center py-1">
+    <div class="w-3 h-3 rounded-full border-2" style="border-color: #059669; background-color: white"></div>
+  </div></div>
+  </div>
+<div class="my-6">
+    <div class="relative bg-white flex items-center gap-3 px-4 py-3" style="border: 2px dashed #dc2626">
+      <div class="flex items-center justify-center w-8 h-8" style="background-color: #dc2626">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <path d="M 2 2 L 2 10 L 10 10 M 7 7 L 10 10 L 7 13" stroke="white" stroke-width="2" fill="none"></path>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <div class="text-[10px] font-bold tracking-[0.2em]" style="color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">DID NOT PASS THRESHOLD</div>
+        <div class="text-[11px] text-stone-600 mt-0.5" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Flow diverts here from step 07. Continue below for the fail path.</div>
+      </div>
+      <svg width="14" height="18" viewBox="0 0 14 18">
+        <path d="M 7 0 L 7 14 M 0 10 L 7 18 L 14 10" stroke="#dc2626" stroke-width="2" fill="none"></path>
+      </svg>
+    </div>
+  </div>
+<div class="relative bg-white" style="border-left: 5px solid #dc2626; border: 1px solid rgba(220, 38, 38, 0.25); border-left-width: 5px">
+    <div class="flex items-baseline gap-3 px-4 py-2 border-b" style="border-color: rgba(220, 38, 38, 0.19); background-color: rgba(220, 38, 38, 0.03)">
+      <span class="text-[9px] font-bold tracking-[0.25em] px-1.5 py-0.5 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">09</span>
+      <span class="text-[11px] font-bold tracking-[0.1em] uppercase" style="color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Below threshold</span>
+      <span class="text-[10px] text-stone-500 ml-auto" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Fallback to manager approval or block</span>
+    </div>
+    <div class="p-4 space-y-2"><div class="flex justify-center py-2">
+    <div class="relative text-[11px] tracking-[0.2em] font-bold px-5 py-2 text-white" style="background-color: #0c0a09; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%)">MANAGER FLOW AVAILABLE?</div>
+  </div>
+<div class="flex flex-col items-stretch">
+    <div class="flex justify-center">
+      <div style="width: 2px; height: 14px; background-color: #1c1917"></div>
+    </div>
+    <div class="grid grid-cols-2 relative"><div class="relative">
+      <div class="absolute top-0" style="left: 50%; right: 0; height: 2px; background-color: #1c1917"></div>
+    </div><div class="relative">
+      <div class="absolute top-0" style="left: 0; right: 50%; height: 2px; background-color: #1c1917"></div>
+    </div></div>
+    <div class="grid grid-cols-2"><div class="flex flex-col items-center">
+      <div style="width: 2px; height: 10px; background-color: #5b21b6"></div>
+      <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #5b21b6; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">YES</div>
+      <div style="width: 2px; height: 8px; background-color: #5b21b6"></div>
+      <svg width="12" height="10" viewBox="0 0 12 10">
+        <path d="M 0 0 L 12 0 L 6 10 Z" fill="#5b21b6"></path>
+      </svg>
+    </div><div class="flex flex-col items-center">
+      <div style="width: 2px; height: 10px; background-color: #dc2626"></div>
+      <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">NO</div>
+      <div style="width: 2px; height: 8px; background-color: #dc2626"></div>
+      <svg width="12" height="10" viewBox="0 0 12 10">
+        <path d="M 0 0 L 12 0 L 6 10 Z" fill="#dc2626"></path>
+      </svg>
+    </div></div>
+  </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"><div>
+      
+      <div class="space-y-1.5"><div class="relative bg-white" style="border-left: 5px solid #5b21b6; border: 1px solid rgba(91, 33, 182, 0.25); border-left-width: 5px">
+    <div class="flex items-baseline gap-3 px-4 py-2 border-b" style="border-color: rgba(91, 33, 182, 0.19); background-color: rgba(91, 33, 182, 0.03)">
+      <span class="text-[9px] font-bold tracking-[0.25em] px-1.5 py-0.5 text-white" style="background-color: #5b21b6; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1</span>
+      <span class="text-[11px] font-bold tracking-[0.1em] uppercase" style="color: #5b21b6; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Manager path</span>
+      <span class="text-[10px] text-stone-500 ml-auto" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Push for approval</span>
+    </div>
+    <div class="p-4 space-y-2"><div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1.1</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Identify manager</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Manager resolved from HR. Recovery context attached to the push payload.
+</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 10px; background-color: #5b21b6"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#5b21b6"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1.2</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Push to manager</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Approval request created and dispatched. 4-hour response timeout.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.peer.request</span></span></div>
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 10px; background-color: #5b21b6"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#5b21b6"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #5b21b6; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>MANAGER</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1.3</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Manager responds + device paired</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">On approve: device enrollment fires alongside the verify event. On deny/timeout: only verify fires (with denied/failure outcome) and flow proceeds to 9.1.6.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">credential.core_app.enroll</span></span><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.peer.verify</span></span></div>
+  </div></div>
+<div class="flex justify-center py-2">
+    <div class="relative text-[11px] tracking-[0.2em] font-bold px-5 py-2 text-white" style="background-color: #0c0a09; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%)">APPROVE?</div>
+  </div>
+<div class="flex flex-col items-stretch">
+    <div class="flex justify-center">
+      <div style="width: 2px; height: 14px; background-color: #1c1917"></div>
+    </div>
+    <div class="grid grid-cols-2 relative"><div class="relative">
+      <div class="absolute top-0" style="left: 50%; right: 0; height: 2px; background-color: #1c1917"></div>
+    </div><div class="relative">
+      <div class="absolute top-0" style="left: 0; right: 50%; height: 2px; background-color: #1c1917"></div>
+    </div></div>
+    <div class="grid grid-cols-2"><div class="flex flex-col items-center">
+      <div style="width: 2px; height: 10px; background-color: #059669"></div>
+      <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">YES</div>
+      <div style="width: 2px; height: 8px; background-color: #059669"></div>
+      <svg width="12" height="10" viewBox="0 0 12 10">
+        <path d="M 0 0 L 12 0 L 6 10 Z" fill="#059669"></path>
+      </svg>
+    </div><div class="flex flex-col items-center">
+      <div style="width: 2px; height: 10px; background-color: #dc2626"></div>
+      <div class="text-[9px] font-bold tracking-[0.2em] px-2 py-0.5 my-1 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">NO · TIMEOUT</div>
+      <div style="width: 2px; height: 8px; background-color: #dc2626"></div>
+      <svg width="12" height="10" viewBox="0 0 12 10">
+        <path d="M 0 0 L 12 0 L 6 10 Z" fill="#dc2626"></path>
+      </svg>
+    </div></div>
+  </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"><div>
+      
+      <div class="space-y-1.5"><div class="relative bg-white" style="border-width: 3px 1px 1px; border-style: solid; border-color: #1c1917"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1.4</span>
+      
+      
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Send success email</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">System log only.</div>
+    
+  </div></div>
+<div class="flex flex-col items-center py-1">
+    <div style="width: 2px; height: 8px; background-color: #059669"></div>
+    
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M 0 0 L 12 0 L 6 10 Z" fill="#059669"></path>
+    </svg>
+  </div>
+<div class="relative bg-white" style="border: 2px solid #059669; border-top-width: 4px"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1.5</span>
+      
+      <span class="ml-auto text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">PASS</span>
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Finalize recovery</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">path: peer_approved</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.complete</span></span></div>
+  </div></div>
+<div class="flex justify-center py-1">
+    <div class="w-3 h-3 rounded-full border-2" style="border-color: #059669; background-color: white"></div>
+  </div></div>
+    </div><div>
+      
+      <div class="space-y-1.5"><div class="relative bg-white" style="border: 2px solid #dc2626; border-top-width: 4px"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.1.6</span>
+      
+      <span class="ml-auto text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">FAIL</span>
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Finalize recovery + suspend</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">path: peer_denied or peer_timeout. Cascading user.suspend follows.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.complete</span></span></div>
+  </div></div>
+<div class="flex justify-center py-1">
+    <div class="w-3 h-3 rounded-full border-2" style="border-color: #dc2626; background-color: white"></div>
+  </div></div>
+    </div></div></div>
+  </div></div>
+    </div><div>
+      
+      <div class="space-y-1.5"><div class="relative bg-white" style="border-left: 5px solid #57534e; border: 1px solid rgba(87, 83, 78, 0.25); border-left-width: 5px">
+    <div class="flex items-baseline gap-3 px-4 py-2 border-b" style="border-color: rgba(87, 83, 78, 0.19); background-color: rgba(87, 83, 78, 0.03)">
+      <span class="text-[9px] font-bold tracking-[0.25em] px-1.5 py-0.5 text-white" style="background-color: #57534e; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.2</span>
+      <span class="text-[11px] font-bold tracking-[0.1em] uppercase" style="color: #57534e; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">No manager path</span>
+      <span class="text-[10px] text-stone-500 ml-auto" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Direct block</span>
+    </div>
+    <div class="p-4 space-y-2"><div class="relative bg-white" style="border: 2px solid #dc2626; border-top-width: 4px"><div class="px-3 py-2.5">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] pl-1 pr-1.5 py-0.5 text-white"
+    style="background-color: #7c2d12; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>BACKEND</span>
+      <span class="text-[9px] tabular-nums tracking-wider text-stone-500" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">9.2.1</span>
+      
+      <span class="ml-auto text-[9px] font-bold tracking-[0.2em] px-1.5 py-0.5 text-white" style="background-color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">FAIL</span>
+    </div>
+    <div class="text-[13px] font-bold text-stone-900 leading-tight" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Finalize recovery + suspend</div>
+    <div class="text-[11px] mt-1 leading-snug text-stone-600" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">path: no_peer_path. Same terminal screen as 9.1.6. Cascading user.suspend follows.
+</div>
+    <div class="flex flex-wrap gap-1 mt-2 pt-2" style="border-top: 1px dashed #b45309"><span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.complete</span></span></div>
+  </div></div>
+<div class="flex justify-center py-1">
+    <div class="w-3 h-3 rounded-full border-2" style="border-color: #dc2626; background-color: white"></div>
+  </div></div>
+  </div></div>
+    </div></div></div>
+  </div></div>
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-3"><div class="bg-white p-3" style="border-left: 5px solid #059669; border: 1px solid rgba(5, 150, 105, 0.25); border-left-width: 5px">
+      <div class="text-[9px] font-bold tracking-[0.25em] mb-1" style="color: #059669; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">PASS · 2 TERMINAL STATES</div>
+      <div class="text-[11px] text-stone-700" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Auto-approved (8.4) · Manager-approved (9.1.5)</div>
+    </div><div class="bg-white p-3" style="border-left: 5px solid #dc2626; border: 1px solid rgba(220, 38, 38, 0.25); border-left-width: 5px">
+      <div class="text-[9px] font-bold tracking-[0.25em] mb-1" style="color: #dc2626; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">FAIL · 3 TERMINAL STATES</div>
+      <div class="text-[11px] text-stone-700" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">Manager denied / timeout (9.1.6) · No manager path (9.2.1) · Owner disputed (async, any time)</div>
+    </div></div>
+        <div class="mt-6 bg-white p-4" style="border: 2px solid #b45309">
+    <div class="text-[9px] font-bold tracking-[0.25em] mb-3 pb-2 flex items-center gap-2" style="color: #92400e; font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; border-bottom: 1px dashed #b45309"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>AUDIT EVENT INDEX · 11 EVENTS</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5"><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.request</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">03</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">auth.totp.verify</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">5.2</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">risk.recovery.create</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">5.4</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.challenge.create</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">5.6</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.challenge.complete</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">06</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">risk.recovery.verdict</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">07</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">credential.core_app.enroll</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">8.1 · 9.1.3</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.peer.request</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">9.1.2</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.peer.verify</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">9.1.3</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.complete</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">8.3 · 9.1.5 · 9.1.6 · 9.2.1</span>
+    </div><div class="flex items-center justify-between gap-2 text-[10px]" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace">
+      <span
+    class="inline-flex items-center gap-1 text-[9px] tracking-[0.03em] px-1.5 py-0.5"
+    style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace; background-color: #fffbeb; color: #92400e; border: 1px solid #b45309"
+  ><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="font-bold">recovery.dispute.create</span></span>
+      <span class="text-stone-500 tabular-nums shrink-0">async (any time post-03)</span>
+    </div></div>
+  </div>
+        <div class="mt-8 pt-4 border-t-2 border-stone-900 text-[10px] text-stone-500 leading-relaxed space-y-1.5" style="font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"><p><span class="font-bold text-stone-800">DEMO SCOPE LIMITATIONS ·</span> No dynamic-KBA feasibility check (sparse-data users may hit odd behaviors), no difficulty classification on questions, canaries sourced from user data only (not tenant-wide), no limited-access option for high-risk passes.
+</p><p><span class="font-bold text-stone-800">RISK SIGNALS IN SCOPE ·</span> privilege level · lifecycle status · known device · last authentication · IP</p><p><span class="font-bold text-stone-800">EVENT NAMING NOTE ·</span> Two names in this chart match the user&#39;s input but differ from the latest spec — auth.totp.verify (spec: mfa.totp.verify, MFA→AUTH rename deferred) and risk.recovery.verdict (spec: risk.recovery.update, since verdict isn&#39;t a locked verb).
+</p></div>
+      </div>
+    </div>
+  
+</body>
+</html>

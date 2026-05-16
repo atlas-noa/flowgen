@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>flowgen · structured flowcharts from markdown</title>
+  <style>
+    :root {
+      --bg: #f5f5f4;          /* stone-100 */
+      --bg-pane: #ffffff;
+      --fg: #1c1917;
+      --fg-muted: #57534e;
+      --fg-faint: #78716c;
+      --border: #d6d3d1;
+      --accent: #0c0a09;
+      --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+      --display: ui-serif, 'Georgia', serif;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--mono);
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+    .kicker {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--fg-faint);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: var(--display);
+      font-size: 56px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 0 0 16px;
+      color: var(--fg);
+    }
+    .lead {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--fg-muted);
+      max-width: 640px;
+      margin: 0;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 640px) {
+      .cards { grid-template-columns: 1fr; }
+      h1 { font-size: 40px; }
+    }
+    .card {
+      display: block;
+      background: var(--bg-pane);
+      border-width: 3px 1px 1px;
+      border-style: solid;
+      border-color: var(--accent);
+      padding: 20px 22px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 0 var(--accent);
+    }
+    .card .tag {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 700;
+      background: var(--accent);
+      color: white;
+      padding: 3px 8px;
+      margin-bottom: 12px;
+    }
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0 0 8px;
+      color: var(--fg);
+    }
+    .card p {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--fg-muted);
+      margin: 0 0 12px;
+    }
+    .card .arrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .section {
+      margin-top: 40px;
+    }
+    .section h3 {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--fg-faint);
+      margin: 0 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .section p,
+    .section li {
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--fg-muted);
+    }
+    .section ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .section code {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--fg);
+    }
+    .section a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .section a:hover { background: var(--accent); color: white; text-decoration: none; }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 16px;
+      border-top: 2px solid var(--accent);
+      font-size: 10px;
+      color: var(--fg-faint);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">flowgen · structured flowcharts from markdown</div>
+      <h1>Flowcharts that match the rest of our docs.</h1>
+      <p class="lead">
+        Write a flow as a YAML-in-Markdown document. Get a printable, embeddable
+        HTML diagram with consistent typography, an actor legend, audit-event
+        annotations, and a terminal-state summary. Same look across every flow
+        the team produces, no design tax.
+      </p>
+    </header>
+
+    <div class="cards">
+      <a class="card" href="editor.html">
+        <span class="tag">Editor</span>
+        <h2>Open the live editor</h2>
+        <p>
+          Split-pane: write the source on the left, see the chart on the right
+          in real time. Save the rendered HTML to a file when you're done.
+        </p>
+        <span class="arrow">Open ↗</span>
+      </a>
+
+      <a class="card" href="recovery-flow.html">
+        <span class="tag">Example</span>
+        <h2>View a rendered example</h2>
+        <p>
+          The Account Recovery flow as a fully rendered chart. Use it as a
+          reference for what the output looks like before you write your own.
+        </p>
+        <span class="arrow">View ↗</span>
+      </a>
+    </div>
+
+    <div class="section">
+      <h3>What you can build</h3>
+      <p>
+        Process flows with up to three levels of nested decisions. Each step
+        carries an actor chip (USER / BACKEND / MANAGER or any custom role you
+        declare), an optional description, and optional audit-event pills.
+        Branches carry color through their entire path — outcome pills,
+        terminal-state cards, and the arrows that lead into them.
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>Reference</h3>
+      <ul>
+        <li>Click <strong>Components ↗</strong> in the editor toolbar for a cheatsheet of every component with a copyable YAML snippet and a rendered preview.</li>
+        <li>Full spec: <a href="https://github.com/">COMPONENTS.md</a> in the repo (replace with your repo URL after pushing).</li>
+        <li>Need a new icon, theme, or layout direction? Edit <code>src/render/icons.ts</code> or open an issue.</li>
+      </ul>
+    </div>
+
+    <footer>
+      flowgen · self-hosted on GitHub Pages · no telemetry, no server
+    </footer>
+  </div>
+</body>
+</html>

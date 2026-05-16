@@ -1,0 +1,13 @@
+# Build artifacts (rebuild from source)
+node_modules/
+dist/
+
+# OS / editor noise
+.DS_Store
+*.log
+
+# Reference materials used while building the renderer — useful locally,
+# not needed in the deployed site or for teammates.
+Claude.html
+Claude_files/
+da60e560-*.tsx
